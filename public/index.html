@@ -19,6 +19,9 @@
     <h1>App Reviews</h1>
     <label for="appId">Enter App ID: </label>
     <input type="text" id="appId" name="appId">
+    <br><br>
+    <label for="reviewsCount">Enter Reviews Count: </label>
+    <input type="number" id="reviewsCount" name="reviewsCount" value="20">
     <button onclick="fetchAppReviews()">Fetch Reviews</button>
     <br><br>
     <div id="reviewsTable"></div>
@@ -26,7 +29,8 @@
     <script>
         async function fetchAppReviews() {
             const appId = document.getElementById('appId').value.trim();
-            const response = await fetch(`/appReviews?appId=${appId}`);
+            const reviewsCount = document.getElementById('reviewsCount').value;
+            const response = await fetch(`/appReviews?appId=${appId}&reviewsCount=${reviewsCount}`);
             const data = await response.json();
 
             if (data.appInfo && data.reviews) {
