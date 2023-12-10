@@ -1,0 +1,61 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>App Reviews</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>App Reviews</h1>
+    <label for="appId">Enter App ID: </label>
+    <input type="text" id="appId" name="appId">
+    <button onclick="fetchAppReviews()">Fetch Reviews</button>
+    <br><br>
+    <div id="reviewsTable"></div>
+
+    <script>
+        async function fetchAppReviews() {
+            const appId = document.getElementById('appId').value.trim();
+            const response = await fetch(`/appReviews?appId=${appId}`);
+            const data = await response.json();
+
+            if (data.appInfo && data.reviews) {
+                const table = document.createElement('table');
+                const headers = ['App ID', 'Rating', 'Username', 'Review'];
+
+                // Create table headers
+                const headerRow = table.insertRow();
+                headers.forEach((header) => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+
+                // Populate table with reviews data
+                data.reviews.forEach((review) => {
+                    const row = table.insertRow();
+                    Object.values(review).forEach((value) => {
+                        const cell = row.insertCell();
+                        cell.textContent = value;
+                    });
+                });
+
+                document.getElementById('reviewsTable').innerHTML = '';
+                document.getElementById('reviewsTable').appendChild(table);
+            } else {
+                document.getElementById('reviewsTable').textContent = 'No reviews found.';
+            }
+        }
+    </script>
+</body>
+</html>
