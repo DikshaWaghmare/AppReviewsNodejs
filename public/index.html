@@ -13,6 +13,9 @@
             padding: 8px;
             text-align: left;
         }
+        #loading {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -20,18 +23,35 @@
     <label for="appId">Enter App ID: </label>
     <input type="text" id="appId" name="appId">
     <br><br>
-    <label for="reviewsCount">Enter Reviews Count: </label>
-    <input type="number" id="reviewsCount" name="reviewsCount" value="20">
-    <button onclick="fetchAppReviews()">Fetch Reviews</button>
+    <label for="reviewsCount">Select Reviews Count: </label>
+    <select id="reviewsCount" name="reviewsCount">
+        <option value="all">All Reviews</option>
+        <option value="10">10 Reviews</option>
+        <option value="20">20 Reviews</option>
+        <option value="50">50 Reviews</option>
+        <!-- Add more options as needed -->
+    </select>
     <br><br>
+    <button onclick="fetchReviews()">Fetch Reviews</button>
+    <br><br>
+    <div id="loading">Loading...</div>
     <div id="reviewsTable"></div>
 
     <script>
-        async function fetchAppReviews() {
+        async function fetchReviews() {
             const appId = document.getElementById('appId').value.trim();
             const reviewsCount = document.getElementById('reviewsCount').value;
+
+            const reviewsTable = document.getElementById('reviewsTable');
+            const loadingDiv = document.getElementById('loading');
+
+            reviewsTable.innerHTML = '';
+            loadingDiv.style.display = 'block';
+
             const response = await fetch(`/appReviews?appId=${appId}&reviewsCount=${reviewsCount}`);
             const data = await response.json();
+
+            loadingDiv.style.display = 'none';
 
             if (data.appInfo && data.reviews) {
                 const table = document.createElement('table');
@@ -54,10 +74,9 @@
                     });
                 });
 
-                document.getElementById('reviewsTable').innerHTML = '';
-                document.getElementById('reviewsTable').appendChild(table);
+                reviewsTable.appendChild(table);
             } else {
-                document.getElementById('reviewsTable').textContent = 'No reviews found.';
+                reviewsTable.textContent = 'No reviews found.';
             }
         }
     </script>

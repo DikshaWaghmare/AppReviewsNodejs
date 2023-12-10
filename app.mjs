@@ -1,4 +1,3 @@
-
 // app.mjs
 import express from 'express';
 import gplay from 'google-play-scraper';
@@ -13,11 +12,22 @@ app.get('/appReviews', async (req, res) => {
 
     try {
         const appInfo = await gplay.app({ appId });
-        let appReviews = await gplay.reviews({
-            appId,
-            sort: gplay.sort.NEWEST,
-            num: parseInt(reviewsCount) || 20, // Convert reviewsCount to a number or default to 20
-        });
+
+        let appReviews;
+        if (reviewsCount === 'all') {
+            appReviews = await gplay.reviews({
+                appId,
+                sort: gplay.sort.NEWEST,
+                num: gplay.count.MAX, // Fetch maximum number of reviews
+            });
+        } else {
+            const count = parseInt(reviewsCount) || 20; // Default to 20 reviews if count is not specified or invalid
+            appReviews = await gplay.reviews({
+                appId,
+                sort: gplay.sort.NEWEST,
+                num: count,
+            });
+        }
 
         if (!Array.isArray(appReviews) && appReviews.data) {
             // If the response is in a different format, extract reviews
