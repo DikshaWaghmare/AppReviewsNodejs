@@ -1,14 +1,13 @@
-// app.mjs
 import express from 'express';
 import gplay from 'google-play-scraper';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.static('public')); // Serve static files from the 'public' folder
+app.use(express.static('public'));
 
 app.get('/appReviews', async (req, res) => {
-    const { appId, reviewsCount } = req.query; // Get the 'appId' and 'reviewsCount' from the query parameters
+    const { appId, reviewsCount, customCount } = req.query;
 
     try {
         const appInfo = await gplay.app({ appId });
@@ -18,19 +17,23 @@ app.get('/appReviews', async (req, res) => {
             appReviews = await gplay.reviews({
                 appId,
                 sort: gplay.sort.NEWEST,
-                num: gplay.count.MAX, // Fetch maximum number of reviews
+                num: gplay.count.MAX,
             });
-        } else {
-            const count = parseInt(reviewsCount) || 20; // Default to 20 reviews if count is not specified or invalid
+        } else if (reviewsCount === 'custom' && customCount) {
+            const count = parseInt(customCount);
             appReviews = await gplay.reviews({
                 appId,
                 sort: gplay.sort.NEWEST,
                 num: count,
             });
+        } else {
+            appReviews = await gplay.reviews({
+                appId,
+                sort: gplay.sort.NEWEST,
+                num: 20, // Default to 20 reviews if count is not specified or invalid
+            });
         }
-
         if (!Array.isArray(appReviews) && appReviews.data) {
-            // If the response is in a different format, extract reviews
             appReviews = appReviews.data;
         }
 

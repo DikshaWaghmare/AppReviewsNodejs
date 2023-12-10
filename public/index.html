@@ -23,24 +23,18 @@
     <label for="appId">Enter App ID: </label>
     <input type="text" id="appId" name="appId">
     <br><br>
-    <label for="reviewsCount">Select Reviews Count: </label>
-    <select id="reviewsCount" name="reviewsCount">
-        <option value="all">All Reviews</option>
-        <option value="10">10 Reviews</option>
-        <option value="20">20 Reviews</option>
-        <option value="50">50 Reviews</option>
-        <!-- Add more options as needed -->
-    </select>
+    <button onclick="fetchAllReviews()">Fetch All Reviews</button>
     <br><br>
-    <button onclick="fetchReviews()">Fetch Reviews</button>
+    <label for="countInput">Enter Reviews Count:</label>
+    <input type="number" id="countInput" name="countInput"><br><br>
+    <button onclick="fetchCustomCount()">Fetch Reviews by Count</button>
     <br><br>
     <div id="loading">Loading...</div>
     <div id="reviewsTable"></div>
 
     <script>
-        async function fetchReviews() {
+        async function fetchAllReviews() {
             const appId = document.getElementById('appId').value.trim();
-            const reviewsCount = document.getElementById('reviewsCount').value;
 
             const reviewsTable = document.getElementById('reviewsTable');
             const loadingDiv = document.getElementById('loading');
@@ -48,36 +42,63 @@
             reviewsTable.innerHTML = '';
             loadingDiv.style.display = 'block';
 
-            const response = await fetch(`/appReviews?appId=${appId}&reviewsCount=${reviewsCount}`);
+            const response = await fetch(`/appReviews?appId=${appId}&reviewsCount=all`);
             const data = await response.json();
 
             loadingDiv.style.display = 'none';
 
             if (data.appInfo && data.reviews) {
-                const table = document.createElement('table');
-                const headers = ['App ID', 'Rating', 'Username', 'Review'];
+                displayReviews(data.reviews);
+            } else {
+                reviewsTable.textContent = 'Fetching all reviews at once is not possible due to API limitations. You can get reviews by enter Reviews count.(You can give any number!)';
+            }
+        }
 
-                // Create table headers
-                const headerRow = table.insertRow();
-                headers.forEach((header) => {
-                    const th = document.createElement('th');
-                    th.textContent = header;
-                    headerRow.appendChild(th);
-                });
+        async function fetchCustomCount() {
+            const appId = document.getElementById('appId').value.trim();
+            const countInput = document.getElementById('countInput').value;
 
-                // Populate table with reviews data
-                data.reviews.forEach((review) => {
-                    const row = table.insertRow();
-                    Object.values(review).forEach((value) => {
-                        const cell = row.insertCell();
-                        cell.textContent = value;
-                    });
-                });
+            const reviewsTable = document.getElementById('reviewsTable');
+            const loadingDiv = document.getElementById('loading');
 
-                reviewsTable.appendChild(table);
+            reviewsTable.innerHTML = '';
+            loadingDiv.style.display = 'block';
+
+            const response = await fetch(`/appReviews?appId=${appId}&reviewsCount=custom&customCount=${countInput}`);
+            const data = await response.json();
+
+            loadingDiv.style.display = 'none';
+
+            if (data.appInfo && data.reviews) {
+                displayReviews(data.reviews);
             } else {
                 reviewsTable.textContent = 'No reviews found.';
             }
+        }
+
+        function displayReviews(reviews) {
+            const reviewsTable = document.getElementById('reviewsTable');
+            const table = document.createElement('table');
+            const headers = ['App ID', 'Rating', 'Username', 'Review'];
+
+            // Create table headers
+            const headerRow = table.insertRow();
+            headers.forEach((header) => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+
+            // Populate table with reviews data
+            reviews.forEach((review) => {
+                const row = table.insertRow();
+                Object.values(review).forEach((value) => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                });
+            });
+
+            reviewsTable.appendChild(table);
         }
     </script>
 </body>
