@@ -33,11 +33,12 @@ app.get('/appReviews', async (req, res) => {
                 num: 20, // Default to 20 reviews if count is not specified or invalid
             });
         }
+
         if (!Array.isArray(appReviews) && appReviews.data) {
             appReviews = appReviews.data;
         }
 
-        if (appInfo && Array.isArray(appReviews)) {
+        if (Array.isArray(appReviews)) {
             const appRating = appInfo.score;
 
             const reviewsData = appReviews.map((review) => ({
@@ -45,6 +46,7 @@ app.get('/appReviews', async (req, res) => {
                 rating: appRating,
                 username: review.userName,
                 review: review.text,
+                date: review.date, // Include the review date
             }));
 
             res.json({ appInfo, reviews: reviewsData });
